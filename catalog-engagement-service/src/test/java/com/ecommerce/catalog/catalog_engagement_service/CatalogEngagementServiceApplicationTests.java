@@ -1,0 +1,13 @@
+package com.ecommerce.catalog.catalog_engagement_service;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class CatalogEngagementServiceApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
