@@ -1,0 +1,63 @@
+erDiagram
+  PRODUCT ||--o{ SKU : has
+  MEMBER ||--o{ MEMBER_ADDRESS : has
+  MEMBER ||--o{ WISHLIST_ITEM : saves
+  PRODUCT ||--o{ REVIEW : receives
+  MEMBER ||--o{ REVIEW : writes
+
+  PRODUCT {
+    string id PK
+    string name
+    string status
+    int basePrice
+    string categoryId
+    string shippingPolicyId
+    datetime createdAt
+  }
+
+  SKU {
+    string id PK
+    string productId
+    string skuCode UK
+    string optionText
+    int price
+    string status
+  }
+
+  MEMBER {
+    string id PK
+    string email UK
+    string passwordHash
+    string name
+    string status
+    datetime createdAt
+  }
+
+  MEMBER_ADDRESS {
+    string id PK
+    string memberId
+    bool isDefault
+    string receiverName
+    string receiverPhone
+    string zipCode
+    string address1
+    string address2
+  }
+
+  WISHLIST_ITEM {
+    string id PK
+    string memberId
+    string productId
+    datetime createdAt
+  }
+
+  REVIEW {
+    string id PK
+    string productId
+    string memberId
+    int rating
+    string content
+    string status
+    bool isPurchaseVerified
+    datetime createdAt
+  }
