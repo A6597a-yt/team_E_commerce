@@ -1,0 +1,50 @@
+flowchart LR
+  U[Client Web/Mobile] --> G[API Gateway / BFF]
+
+  subgraph S1[Catalog & Engagement]
+    P[Product Service + DB]
+    M[Member Service + DB]
+    R[Review Service + DB]
+    C[Cart Service + Redis]
+  end
+
+  subgraph S2[Core Commerce]
+    O[Order Service + DB]
+    I[Inventory Service + DB]
+    Pay[Payment Service + DB]
+    Pro[Promotion Service + DB]
+    D[Delivery Service + DB]
+    Cl[Claim Service + DB]
+  end
+
+  subgraph S3[Operation & Support]
+    B[Backoffice Service + DB]
+    N[Notification Service + DB]
+    CS[CS Service + DB]
+  end
+
+  subgraph Infra[Infra]
+    MQ[(Event Broker)]
+    PG[(External PG)]
+  end
+
+  G --> P
+  G --> M
+  G --> C
+  G --> O
+  G --> Pay
+  G --> Cl
+  G --> B
+  G --> CS
+
+  Pay <--> PG
+
+  Pay --> MQ
+  Cl --> MQ
+  D --> MQ
+
+  MQ --> I
+  MQ --> Pro
+  MQ --> D
+  MQ --> O
+  MQ --> N

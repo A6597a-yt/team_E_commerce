@@ -1,0 +1,78 @@
+[해당코드는 eraser.io 에서 제작함]
+
+Draw a system architecture and data flow diagram for a Microservices E-commerce System.
+
+1. Grouping and Nodes:
+Please organize the following nodes into 3 distinct visual bounding boxes (use different background colors for each group):
+
+Group 1: Core Commerce
+Nodes: Order, Inventory, Payment, Promotion, Delivery, Claim
+
+Group 2: Catalog & Engagement
+Nodes: Product, Member, Review, Cart
+
+Group 3: Operation & Support
+Nodes: Backoffice, Notification, CS
+
+2. Edges and Data Flow:
+Draw directed arrows between the nodes. Label each arrow with the following actions and payloads:
+
+[Order Orchestration]
+
+Order -> Product : Verify price [product_id]
+
+Order -> Promotion : Use coupon [coupon_id, amount]
+
+Order -> Inventory : Deduct stock [product_id, qty]
+
+Order -> Payment : Request payment [order_id, amount]
+
+Order -> Delivery : Delivery prep [order_id, address]
+
+Order -> Cart : Empty cart [member_id, product_id]
+
+Order -> Notification : Send success [member_id, type]
+
+[Claim / Rollback Orchestration]
+
+Claim -> Payment : Cancel [order_id, amount]
+
+Claim -> Inventory : Restore stock [product_id, qty]
+
+Claim -> Promotion : Restore coupon [coupon_id, point]
+
+Claim -> Order : Update status [order_id]
+
+[Other Interactions]
+
+Inventory -> Notification : Out of stock [product_id]
+
+Member -> Notification : Welcome [member_id]
+
+Review -> Order : Verify purchase [product_id]
+
+Review -> Promotion : Reward point [member_id, point]
+
+Cart -> Product : Sync info [product_id]
+
+Delivery -> Order : Sync status [order_id, status]
+
+Delivery -> Notification : Delivery start [member_id]
+
+CS -> Order : Check history [order_id]
+
+CS -> Notification : CS answered [member_id]
+
+Backoffice -> Order : Control [action_type]
+
+Backoffice -> Member : Control [action_type]
+
+Backoffice -> Product : Control [action_type]
+
+3. Visual Requirements:
+
+Make 'Order' the central node of the diagram.
+
+Use unidirectional arrows. Ensure the labels are readable.
+
+Use a dashed line for arrows pointing to the 'Notification' node to represent asynchronous background events.

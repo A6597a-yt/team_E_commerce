@@ -1,0 +1,136 @@
+erDiagram
+  ORDER ||--o{ ORDER_LINE_ITEM : contains
+  PAYMENT ||--o{ PAYMENT_REFUND : has
+  CLAIM ||--o{ CLAIM_ITEM : includes
+  SHIPMENT ||--o{ SHIPMENT_ITEM : contains
+  STOCK ||--o{ STOCK_RESERVATION : reserves
+
+  ORDER {
+    string id PK
+    string orderNo UK
+    string memberId
+    string status
+    int subtotalAmount
+    int discountAmount
+    int pointUsedAmount
+    int shippingFeeAmount
+    int totalPayAmount
+    string appliedCouponId
+    string idempotencyKey
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  ORDER_LINE_ITEM {
+    string id PK
+    string orderId
+    string productId
+    string skuId
+    string productNameSnapshot
+    string optionTextSnapshot
+    int unitPriceSnapshot
+    int quantity
+    int lineTotalAmount
+    datetime createdAt
+  }
+
+  PAYMENT {
+    string id PK
+    string orderId
+    string memberId
+    string status
+    int payAmount
+    string method
+    string pgProvider
+    string pgTransactionId
+    string idempotencyKey
+    datetime paidAt
+    datetime createdAt
+  }
+
+  PAYMENT_REFUND {
+    string id PK
+    string paymentId
+    string orderId
+    string claimId
+    int refundAmount
+    string status
+    datetime createdAt
+  }
+
+  STOCK {
+    string id PK
+    string skuId UK
+    int totalStock
+    int reservedStock
+    string saleStatus
+    int version
+    datetime updatedAt
+  }
+
+  STOCK_RESERVATION {
+    string id PK
+    string orderId
+    string skuId
+    int quantity
+    string status
+    datetime expiresAt
+    datetime createdAt
+  }
+
+  COUPON {
+    string id PK
+    string memberId
+    string couponPolicyId
+    string status
+    datetime expiresAt
+    string usedOrderId
+  }
+
+  POINT_LEDGER {
+    string id PK
+    string memberId
+    int delta
+    int balanceAfter
+    string reasonCode
+    string refType
+    string refId
+    datetime createdAt
+  }
+
+  SHIPMENT {
+    string id PK
+    string orderId
+    string memberId
+    string status
+    string trackingNumber
+    string carrier
+    datetime createdAt
+  }
+
+  SHIPMENT_ITEM {
+    string id PK
+    string shipmentId
+    string skuId
+    int quantity
+  }
+
+  CLAIM {
+    string id PK
+    string orderId
+    string memberId
+    string type
+    string status
+    int refundAmount
+    bool couponRollback
+    int refundPointAmount
+    string reasonCode
+    datetime createdAt
+  }
+
+  CLAIM_ITEM {
+    string id PK
+    string claimId
+    string skuId
+    int quantity
+  }
