@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL  # MySQL 문법과 호환되도록 모드 설정
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # 서버 시작 시 테이블 자동 생성, 종료 시 삭제
+    show-sql: true           # 콘솔창에 실행되는 쿼리를 보여줌
+    properties:
+      hibernate:
+        format_sql: true     # 쿼리를 보기 좋게 정렬해서 출력해 줌
+
+  h2:
+    console:
+      enabled: true          # 웹 브라우저에서 DB를 볼 수 있는 H2 콘솔 기능 켜기
+      path: /h2-console      # 접속 주소 설정

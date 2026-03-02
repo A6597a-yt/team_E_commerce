@@ -10,7 +10,7 @@
 - **[팀원 3 이름]**: [담당 역할 및 구현 기능] (예: UI/UX 화면 설계, 상품 검색 프론트엔드 개발)
 
 ## 🛠 기술 스택 (Tech Stack)
-- **Language**: Python 3.x 등
+- **Language**: Java 버전 21 (JDK21) + SpringBoot 3.5.11
 - **Frontend**: [사용 기술]
 - **Backend**: [사용 기술]
 - **Database**: [사용 기술]
