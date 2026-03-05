@@ -1,0 +1,18 @@
+bootJar { enabled = true }
+jar { enabled = false }
+
+dependencies {
+	implementation project(':module-core')
+	implementation project(':module-catalog-member')
+	implementation project(':module-support')
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

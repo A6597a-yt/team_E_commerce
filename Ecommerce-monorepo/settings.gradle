@@ -1,0 +1,6 @@
+rootProject.name = 'ecommerce-monorepo'
+
+include 'module-core',
+        'module-catalog-member',
+        'module-support',
+        'module-bootstrap'
