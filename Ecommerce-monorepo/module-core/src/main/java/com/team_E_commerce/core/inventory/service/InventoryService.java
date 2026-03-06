@@ -1,4 +1,4 @@
-﻿package com.team_E_commerce.core.inventory.service;
+package com.team_E_commerce.core.inventory.service;
 
 import com.team_E_commerce.core.inventory.domain.Inventory;
 import com.team_E_commerce.core.inventory.domain.InventoryRepository;

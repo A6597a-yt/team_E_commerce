@@ -1,4 +1,4 @@
-﻿package com.team_E_commerce.core.order.domain;
+package com.team_E_commerce.core.order.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

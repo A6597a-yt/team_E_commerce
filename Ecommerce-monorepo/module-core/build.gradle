@@ -3,4 +3,5 @@ jar { enabled = true }
 
 dependencies {
     implementation project(':module-catalog-member')
+    implementation project(':module-common')
 }

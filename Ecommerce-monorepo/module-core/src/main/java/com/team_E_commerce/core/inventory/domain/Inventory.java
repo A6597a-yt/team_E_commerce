@@ -1,4 +1,4 @@
-﻿package com.team_E_commerce.core.inventory.domain;
+package com.team_E_commerce.core.inventory.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -31,9 +31,16 @@ public class Inventory {
 
     // 객체 스스로 재고를 차감합니다.
     public void decrease(int quantity) {
+        // 음수나 0이 들어오는 경우 예방
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("차감할 재고 수량은 1 이상이어야 합니다. 입력값: " + quantity);
+        }
+
+        // 남은 재고가 부족한지 확인
         if (this.stockQuantity - quantity < 0) {
             throw new OutOfStockException("재고가 부족합니다. 남은 수량: " + this.stockQuantity);
         }
+
         this.stockQuantity -= quantity;
     }
 

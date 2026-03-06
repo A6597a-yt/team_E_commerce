@@ -1,4 +1,4 @@
-﻿package com.team_E_commerce.core.inventory.facade;
+package com.team_E_commerce.core.inventory.facade;
 
 import com.team_E_commerce.core.inventory.domain.InventoryConflictException;
 import com.team_E_commerce.core.inventory.service.InventoryService;

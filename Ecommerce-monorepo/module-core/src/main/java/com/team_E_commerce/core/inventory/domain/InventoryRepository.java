@@ -1,4 +1,4 @@
-﻿package com.team_E_commerce.core.inventory.domain;
+package com.team_E_commerce.core.inventory.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
