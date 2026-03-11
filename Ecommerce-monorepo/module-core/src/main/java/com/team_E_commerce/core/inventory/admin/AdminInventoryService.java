@@ -1,7 +1,7 @@
 package com.team_E_commerce.core.inventory.admin;
 
 import com.team_E_commerce.core.inventory.domain.Inventory;
-import com.team_E_commerce.core.inventory.domain.InventoryRepository;
+import com.team_E_commerce.core.inventory.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

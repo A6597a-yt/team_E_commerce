@@ -1,5 +1,6 @@
 package com.team_E_commerce.core.inventory.domain;
 
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
