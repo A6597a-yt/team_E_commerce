@@ -1,7 +1,7 @@
 package com.team_e_commerce.support.cs.controller;
 
-import com.team_E_commerce.common.annotation.LoginMemberId;
-import com.team_E_commerce.common.response.ApiResponse;
+import com.team_e_commerce.common.annotation.LoginMemberId;
+import com.team_e_commerce.common.response.ApiResponse;
 import com.team_e_commerce.support.cs.dto.TicketCreateRequest;
 import com.team_e_commerce.support.cs.dto.TicketResponse;
 import com.team_e_commerce.support.cs.service.CsTicketService;

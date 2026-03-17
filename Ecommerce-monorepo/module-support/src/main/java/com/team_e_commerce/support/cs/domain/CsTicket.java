@@ -1,6 +1,6 @@
 package com.team_e_commerce.support.cs.domain;
 
-import com.team_E_commerce.common.entity.BaseTimeEntity;
+import com.team_e_commerce.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

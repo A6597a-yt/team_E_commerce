@@ -1,7 +1,7 @@
 package com.team_e_commerce.support.cs.service;
 
-import com.team_E_commerce.common.exception.BusinessException;
-import com.team_E_commerce.common.exception.ErrorCode;
+import com.team_e_commerce.common.exception.BusinessException;
+import com.team_e_commerce.common.exception.ErrorCode;
 import com.team_e_commerce.support.cs.domain.CsTicket;
 import com.team_e_commerce.support.cs.domain.CsTicketRepository;
 import com.team_e_commerce.support.cs.dto.TicketCreateRequest;
