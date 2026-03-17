@@ -1,11 +1,11 @@
 package com.team_e_commerce.catalog.service;
 
+import com.team_E_commerce.common.exception.BusinessException;
+import com.team_E_commerce.common.exception.ErrorCode;
 import com.team_e_commerce.catalog.domain.Product;
 import com.team_e_commerce.catalog.domain.ProductRepository;
 import com.team_e_commerce.catalog.dto.ProductCreateRequest;
 import com.team_e_commerce.catalog.dto.ProductResponse;
-import com.team_e_commerce.common.exception.BusinessException;
-import com.team_e_commerce.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,6 @@ public class ProductService {
                 .sellerId(sellerId)
                 .name(request.name())
                 .price(request.price())
-                .stockQuantity(request.stockQuantity())
                 .description(request.description())
                 .build();
 

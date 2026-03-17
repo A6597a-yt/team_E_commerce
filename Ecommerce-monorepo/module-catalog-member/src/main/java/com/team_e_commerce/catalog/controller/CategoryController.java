@@ -1,8 +1,8 @@
 package com.team_e_commerce.catalog.controller;
 
+import com.team_E_commerce.common.response.ApiResponse;
 import com.team_e_commerce.catalog.dto.CategoryResponse;
 import com.team_e_commerce.catalog.service.CategoryService;
-import com.team_e_commerce.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

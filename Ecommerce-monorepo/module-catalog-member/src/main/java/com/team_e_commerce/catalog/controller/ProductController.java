@@ -1,10 +1,10 @@
 package com.team_e_commerce.catalog.controller;
 
+import com.team_E_commerce.common.annotation.LoginMemberId;
+import com.team_E_commerce.common.response.ApiResponse;
 import com.team_e_commerce.catalog.dto.ProductCreateRequest;
 import com.team_e_commerce.catalog.dto.ProductResponse;
 import com.team_e_commerce.catalog.service.ProductService;
-import com.team_e_commerce.common.annotation.LoginMemberId;
-import com.team_e_commerce.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

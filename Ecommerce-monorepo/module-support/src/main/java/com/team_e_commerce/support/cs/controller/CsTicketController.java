@@ -1,7 +1,9 @@
 package com.team_e_commerce.support.cs.controller;
 
-import com.team_e_commerce.common.annotation.LoginMemberId;
-import com.team_e_commerce.common.response.ApiResponse;
+import com.team_E_commerce.common.annotation.LoginMemberId;
+import com.team_E_commerce.common.response.ApiResponse;
+import com.team_e_commerce.support.cs.dto.TicketCreateRequest;
+import com.team_e_commerce.support.cs.dto.TicketResponse;
 import com.team_e_commerce.support.cs.service.CsTicketService;
 // DTO 클래스는 임의로 가정한 이름입니다. 실제 작성하신 DTO 패키지 경로를 임포트하세요.
 // import com.team_e_commerce.support.cs.dto.*;
