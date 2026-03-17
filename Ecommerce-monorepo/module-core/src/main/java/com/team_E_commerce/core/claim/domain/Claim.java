@@ -1,6 +1,9 @@
 package com.team_E_commerce.core.claim.domain;
 
 import com.team_E_commerce.common.entity.BaseEntity;
+import com.team_E_commerce.common.exception.BusinessException;
+import com.team_E_commerce.common.exception.ErrorCode;
+import com.team_E_commerce.core.claim.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,80 +14,122 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+// ★ 수정 1: 인덱스 컬럼을 물리적 컬럼명(snake_case)으로 명확히 지정
+@Table(name = "claims", indexes = {
+        @Index(name = "idx_claim_member_id", columnList = "member_id"),
+        @Index(name = "idx_claim_created_at", columnList = "created_at")
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Claim extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // 클레임 id
     private Long id;
 
-    // 주문상세 id
     @Column(nullable = false)
     private Long orderLineItemId;
 
     @Column(nullable = false)
-    // 멤버 id
     private Long memberId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    // 취소, 교환, 반품
+    private String productName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private ClaimType claimType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    // 진행상태
+    @Column(nullable = false, length = 20)
     private ClaimStatus claimStatus;
 
-    @Column(nullable = false, length = 500)
-    // 사유
+    @Column(length = 500)
     private String reason;
 
-    @Column(nullable = false)
-    // 수량
-    private Integer claimQuantity;
+    private Long claimAmount;
+    private Long claimQuantity;
 
-    @Column(nullable = false)
-    // 환불,취소 대상 금액 스냅샷
-    private Integer claimAmount;
+    @Column(name = "order_number", nullable = false)
+    private String orderNumber;
 
-    // 사진 첨부 (문자열 URL 배열 저장)
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "claim_images", joinColumns = @JoinColumn(name = "claim_id"))
-    @Column(name = "image_url")
+    @Column(name = "reject_reason", length = 500)
+    private String rejectReason;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT")
     private List<String> imageUrls = new ArrayList<>();
 
-    // 환불 계좌 (카드 결제 취소 시 null 허용)
     @Embedded
     private RefundAccount refundAccount;
 
+    public enum ClaimType { CANCEL, RETURN, EXCHANGE }
+    public enum ClaimStatus { REQUESTED, PROCESSING, COMPLETED, REJECTED, WITHDRAWN }
+
     @Builder
-    public Claim(Long orderLineItemId, Long memberId, ClaimType claimType, String reason, Integer claimQuantity, Integer claimAmount,
-                 List<String> imageUrls, RefundAccount refundAccount) {
+    public Claim(Long orderLineItemId, Long memberId, String productName, ClaimType claimType,
+                 String reason, Long claimAmount, Long claimQuantity,
+                 List<String> imageUrls, RefundAccount refundAccount, String orderNumber) {
         this.orderLineItemId = orderLineItemId;
         this.memberId = memberId;
+        this.productName = productName;
         this.claimType = claimType;
-        this.claimStatus = ClaimStatus.REQUESTED; // 최초 생성 시 무조건 '요청됨' 상태
+        this.claimStatus = ClaimStatus.REQUESTED;
         this.reason = reason;
-        this.claimQuantity = claimQuantity;
         this.claimAmount = claimAmount;
+        this.claimQuantity = claimQuantity;
         this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
         this.refundAccount = refundAccount;
+        this.orderNumber = orderNumber;
     }
 
-    // 내부 Enum 및 Embeddable 클래스
+    public void withdraw() {
+        if (this.claimStatus != ClaimStatus.REQUESTED) {
+            throw new BusinessException(ErrorCode.INVALID_CLAIM_STATUS);
+        }
+        this.claimStatus = ClaimStatus.WITHDRAWN;
+    }
 
-    public enum ClaimType { CANCEL, RETURN, EXCHANGE }
+    public void startProcessing() {
+        if (this.claimStatus != ClaimStatus.REQUESTED) {
+            throw new BusinessException(ErrorCode.INVALID_CLAIM_STATUS);
+        }
+        this.claimStatus = ClaimStatus.PROCESSING;
+    }
 
-    public enum ClaimStatus { REQUESTED, PROCESSING, COMPLETED, REJECTED }
+    public void complete() {
+        if (this.claimStatus == ClaimStatus.COMPLETED) {
+            return;
+        }
+
+        if (this.claimStatus != ClaimStatus.REQUESTED && this.claimStatus != ClaimStatus.PROCESSING) {
+            throw new BusinessException(ErrorCode.INVALID_CLAIM_STATUS);
+        }
+
+        this.claimStatus = ClaimStatus.COMPLETED;
+    }
+
+    public void reject(String rejectReason) {
+        if (this.claimStatus == ClaimStatus.REJECTED) {
+            return;
+        }
+        if (this.claimStatus != ClaimStatus.REQUESTED && this.claimStatus != ClaimStatus.PROCESSING) {
+            throw new BusinessException(ErrorCode.INVALID_CLAIM_STATUS);
+        }
+        this.claimStatus = ClaimStatus.REJECTED;
+        this.rejectReason = rejectReason;
+    }
 
     @Getter
-    @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Embeddable
     public static class RefundAccount {
+        @Column(name = "refund_bank_name", length = 50)
         private String bankName;
+
+        @Column(name = "refund_account_number", length = 100)
         private String accountNumber;
+
+        @Column(name = "refund_account_holder", length = 50)
         private String accountHolder;
 
         @Builder

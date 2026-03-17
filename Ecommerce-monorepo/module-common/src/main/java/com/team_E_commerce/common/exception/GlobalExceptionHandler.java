@@ -1,66 +1,89 @@
 package com.team_E_commerce.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException; // ★ 추가됨
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j // 로그백(Logback) 로거 활성화
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 프론트엔드의 폼 입력값 검증 실패 (@Valid 에러)
+    // 1. 비즈니스 예외 처리 (도메인 규칙 위반)
+    @ExceptionHandler(BusinessException.class)
+    protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e, HttpServletRequest request) {
+        log.warn("BusinessException: {}", e.getMessage());
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse response = ErrorResponse.of(errorCode, request.getRequestURI());
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    // 2. DTO @Valid 검증 실패 처리 (객체 필드 에러)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e, HttpServletRequest request) {
+        log.warn("MethodArgumentNotValidException: {}", e.getMessage());
 
-        // 경고 수준의 로그 (서버 잘못이 아니므로 warn)
-        log.warn("요청값 검증 실패 - URI: {}, Message: {}", request.getRequestURI(), ex.getMessage());
-
-        // 여러 개의 필드 에러를 수집하여 빌더로 깔끔하게 조립
-        List<ErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult()
+        // record 구조에 맞게 생성 로직 수정
+        List<ErrorResponse.FieldErrorDetail> errors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> ErrorResponse.FieldErrorDetail.builder()
-                        .field(error.getField())
-                        .value(error.getRejectedValue() == null ? "null" : error.getRejectedValue().toString())
-                        .reason(error.getDefaultMessage())
-                        .build()
-                )
-                .collect(Collectors.toList());
+                .map(error -> new ErrorResponse.FieldErrorDetail(
+                        error.getField(),
+                        error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
+                        error.getDefaultMessage()
+                ))
+                .toList();
 
-        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, request.getRequestURI(), fieldErrors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, request.getRequestURI(), errors);
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus()).body(response);
     }
 
-    // 비즈니스 로직 예외 (예: 재고 부족, 권한 없음 등)
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(
-            BusinessException ex, HttpServletRequest request) {
+    // 3. 단일 파라미터 (@PathVariable, @RequestParam) 검증 실패 처리
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException e, HttpServletRequest request) {
+        log.warn("ConstraintViolationException: {}", e.getMessage());
 
-        // 의도된 비즈니스 거절이므로 warn 로그
-        log.warn("비즈니스 예외 발생 - URI: {}, Code: {}", request.getRequestURI(), ex.getErrorCode().getCode());
+        // 어떤 파라미터가 왜 실패했는지 추적
+        List<ErrorResponse.FieldErrorDetail> errors = e.getConstraintViolations()
+                .stream()
+                .map(violation -> new ErrorResponse.FieldErrorDetail(
+                        violation.getPropertyPath().toString(), // 위반된 파라미터 경로
+                        violation.getInvalidValue() == null ? "" : violation.getInvalidValue().toString(),
+                        violation.getMessage()
+                ))
+                .toList();
 
-        ErrorResponse errorResponse = ErrorResponse.of(ex.getErrorCode(), request.getRequestURI());
-        return ResponseEntity.status(ex.getErrorCode().getStatus()).body(errorResponse);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, request.getRequestURI(), errors);
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus()).body(response);
     }
 
-    // 서버 내부 에러
+    // 4. JSON 파싱 에러 (Enum 타입 불일치 등) 처리
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException e, HttpServletRequest request) {
+        log.warn("HttpMessageNotReadableException: {}", e.getMessage());
+
+        String customMessage = "요청 데이터 형식이 올바르지 않거나 허용되지 않는 값(예: 잘못된 타입 지정)이 포함되어 있습니다.";
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, customMessage, request.getRequestURI());
+
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus()).body(response);
+    }
+
+    // 5. 그 외 잡아내지 못한 서버 에러 처리
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAllExceptions(
-            Exception ex, HttpServletRequest request) {
+    protected ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
+        log.error("Unhandled Exception: ", e);
 
-        // 서버 버그이므로 즉각적인 알림을 위해 error 로그 + 스택 트레이스 전체 출력
-        log.error("서버 내부 치명적 에러 발생! URI: {}", request.getRequestURI(), ex);
-
-        // 프론트엔드에게는 서버 내부 구조(SQL, 패키지 경로)를 절대 노출하지 않고 포장해서 응답
-        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, request.getRequestURI());
+        return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus()).body(response);
     }
 }

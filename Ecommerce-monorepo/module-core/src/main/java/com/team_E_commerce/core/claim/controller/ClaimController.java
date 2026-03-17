@@ -1,32 +1,58 @@
 package com.team_E_commerce.core.claim.controller;
 
-import com.team_E_commerce.common.annotation.LoginMemberId;
 import com.team_E_commerce.common.response.ApiResponse;
+import com.team_E_commerce.common.response.PageResponse;
 import com.team_E_commerce.core.claim.dto.ClaimCreateRequest;
 import com.team_E_commerce.core.claim.dto.ClaimResponse;
+import com.team_E_commerce.core.claim.dto.ClaimSearchCondition;
 import com.team_E_commerce.core.claim.service.ClaimService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/claims")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/claims")
 public class ClaimController {
 
     private final ClaimService claimService;
 
+    // 1. 클레임 접수
     @PostMapping
-    public ApiResponse<List<ClaimResponse>> createClaim(
-            @LoginMemberId Long memberId,
-            @Valid @RequestBody ClaimCreateRequest request) { // 에러 나면 글로벌 핸들러가 출동
-
-        // 1. 서비스 계층으로 비즈니스 로직 위임 (1개 이상의 클레임이 생성되어 반환됨)
+    public ApiResponse<List<ClaimResponse>> createClaims(
+            @AuthenticationPrincipal Long memberId,
+            @Valid @RequestBody ClaimCreateRequest request
+    ) {
         List<ClaimResponse> responses = claimService.createClaims(memberId, request);
+        return ApiResponse.created(responses); // 201 응답과 함께 생성된 데이터 반환
+    }
 
-        // 2. 외부 통신용 성공 껍데기(201 Created)로 예쁘게 포장해서 프론트엔드에 전달
-        return ApiResponse.created(responses);
+    // 내 클레임 내역 조회 (GET)
+    @GetMapping
+    public ApiResponse<PageResponse<ClaimResponse>> getClaimHistory(
+            @AuthenticationPrincipal Long memberId,
+            @ModelAttribute ClaimSearchCondition condition,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<ClaimResponse> claimPage = claimService.getClaimHistory(memberId, condition, pageable);
+
+        // 공통 모듈인 PageResponse로 감싸서 반환
+        return ApiResponse.ok(new PageResponse<>(claimPage));
+    }
+
+    // 3. 클레임 철회 (PATCH)
+    @PatchMapping("/{claimId}/withdraw")
+    public ApiResponse<Void> withdrawClaim(
+            @AuthenticationPrincipal Long memberId,
+            @PathVariable Long claimId
+    ) {
+        claimService.withdrawClaim(memberId, claimId);
+        return ApiResponse.ok();
     }
 }

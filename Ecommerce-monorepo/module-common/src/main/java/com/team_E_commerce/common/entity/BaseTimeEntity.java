@@ -23,5 +23,6 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate
     @Column(nullable = false)
     // 마지막 수정 시간
-    private LocalDateTime updatedAt;
+    protected
+    LocalDateTime updatedAt;
 }
