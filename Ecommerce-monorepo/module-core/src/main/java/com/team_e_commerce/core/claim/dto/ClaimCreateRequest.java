@@ -1,7 +1,8 @@
 package com.team_e_commerce.core.claim.dto;
 
 import com.team_e_commerce.common.annotation.ValidEnum;
-import com.team_e_commerce.core.claim.domain.Claim;
+import com.team_e_commerce.core.claim.entity.Claim;
+import com.team_e_commerce.core.claim.entity.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,8 +18,8 @@ public record ClaimCreateRequest(
         @Size(min = 1, message = "최소 1개 이상의 상품을 선택해야 합니다.")
         List<ClaimItem> claimItems,
 
-        // String으로 받고 커스텀 어노테이션으로 검증합니다.
-        @ValidEnum(enumClass = Claim.ClaimType.class, message = "올바른 클레임 타입(CANCEL, RETURN, EXCHANGE)을 입력해 주세요.")
+        @ValidEnum(enumClass = Claim.ClaimType.class,
+                message = "올바른 클레임 타입(CANCEL, RETURN, EXCHANGE)을 입력해 주세요.")
         String claimType,
 
         @NotBlank(message = "사유를 입력해 주세요.")
@@ -26,8 +27,15 @@ public record ClaimCreateRequest(
 
         List<String> imageUrls,
 
-        @Valid // ★ 추가: 내부 필드 검증을 활성화합니다.
-        RefundAccountDto refundAccount
+        @NotNull(message = "결제 수단은 필수입니다.")
+        PaymentMethod paymentMethod,
+
+        // Facade/Service 계층에서 paymentMethod에 따라 동적으로 검증.
+        RefundAccountDto refundAccount,
+
+        // 수거지 주소 (RETURN, EXCHANGE 타입일 경우 Service에서 필수값 검증)
+        String returnAddress
+
 ) {
     public record ClaimItem(
             @NotNull(message = "주문 상품 ID는 필수입니다.")
@@ -39,7 +47,6 @@ public record ClaimCreateRequest(
     ) {}
 
     public record RefundAccountDto(
-            // ★ 추가: 객체가 넘어왔다면, 내부 필드는 비어있으면 안 됩니다.
             @NotBlank(message = "환불 은행명은 필수입니다.")
             String bankName,
 

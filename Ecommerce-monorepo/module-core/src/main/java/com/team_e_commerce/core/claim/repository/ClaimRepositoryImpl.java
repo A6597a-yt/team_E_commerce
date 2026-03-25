@@ -3,76 +3,96 @@ package com.team_e_commerce.core.claim.repository;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.team_e_commerce.core.claim.domain.Claim;
 import com.team_e_commerce.core.claim.dto.ClaimSearchCondition;
+import com.team_e_commerce.core.claim.entity.Claim;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.team_e_commerce.core.claim.domain.QClaim.claim;
+// Q클래스는 부모인 QClaim 하나만 import
+import static com.team_e_commerce.core.claim.entity.QClaim.claim;
 
+@Repository
 @RequiredArgsConstructor
 public class ClaimRepositoryImpl implements ClaimRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
+    // 1. 관리자(Admin) 전체 클레임 조회
     @Override
-    public Page<Claim> searchClaims(Long memberId, ClaimSearchCondition condition, Pageable pageable) {
-
-        // 데이터 조회 쿼리
+    public Page<Claim> searchClaims(ClaimSearchCondition condition, Pageable pageable) {
         List<Claim> content = queryFactory
                 .selectFrom(claim)
-                .where(
-                        memberIdEq(memberId, condition.memberId()),
-                        claimTypeEq(condition.claimType()),
-                        claimStatusEq(condition.claimStatus()),
-                        orderNumberEq(condition.orderNumber()),
-                        createdAtBetween(condition.getStartDateTime(), condition.getEndDateTime())
-                )
+                // 헬퍼 메서드를 통해 조건절 조립 (파라미터 memberId는 null로 전달)
+                .where(buildSearchConditions(null, condition))
                 .orderBy(getOrderSpecifiers(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 2. 카운트 쿼리 분리
         JPAQuery<Long> countQuery = queryFactory
                 .select(claim.count())
                 .from(claim)
-                .where(
-                        memberIdEq(memberId, condition.memberId()),
-                        claimTypeEq(condition.claimType()),
-                        claimStatusEq(condition.claimStatus()),
-                        orderNumberEq(condition.orderNumber()),
-                        createdAtBetween(condition.getStartDateTime(), condition.getEndDateTime())
-                );
+                .where(buildSearchConditions(null, condition));
 
-        // 첫 페이지인데 데이터가 사이즈보다 적거나, 마지막 페이지일 경우 카운트 쿼리를 DB에 날리지 않고 생략
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
-    // null 반환 시 QueryDSL이 조건절에서 깔끔하게 무시.
+    // 2. 고객 본인 클레임 조회
+    @Override
+    public Page<Claim> searchClaims(Long memberId, ClaimSearchCondition condition, Pageable pageable) {
+        List<Claim> content = queryFactory
+                .selectFrom(claim)
+                .where(buildSearchConditions(memberId, condition))
+                .orderBy(getOrderSpecifiers(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
-    private BooleanExpression memberIdEq(Long paramMemberId, Long conditionMemberId) {
-        // 고객 본인 조회(파라미터)가 우선, 없으면 어드민 검색 조건 활용
-        Long targetMemberId = paramMemberId != null ? paramMemberId : conditionMemberId;
-        return targetMemberId != null ? claim.memberId.eq(targetMemberId) : null;
+        JPAQuery<Long> countQuery = queryFactory
+                .select(claim.count())
+                .from(claim)
+                .where(buildSearchConditions(memberId, condition));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    // 공통 검색 조건 조립 헬퍼
+    // 조건이 누락되거나 관리자/고객 쿼리 간에 파편화되는 것을 방지.
+    private BooleanExpression[] buildSearchConditions(Long memberId, ClaimSearchCondition condition) {
+        return new BooleanExpression[]{
+                memberIdEq(memberId, condition.memberId()),
+                claimTypeEq(condition.claimType()),
+                claimStatusEq(condition.claimStatus()),
+                orderNumberEq(condition.orderNumber()),
+                createdAtBetween(condition.getStartDateTime(), condition.getEndDateTime())
+        };
+    }
+
+    // 개별 검색 조건 메서드
     private BooleanExpression claimTypeEq(Claim.ClaimType claimType) {
         return claimType != null ? claim.claimType.eq(claimType) : null;
     }
 
     private BooleanExpression claimStatusEq(Claim.ClaimStatus claimStatus) {
         return claimStatus != null ? claim.claimStatus.eq(claimStatus) : null;
+    }
+
+    private BooleanExpression memberIdEq(Long paramMemberId, Long conditionMemberId) {
+        Long targetMemberId = paramMemberId != null ? paramMemberId : conditionMemberId;
+        return targetMemberId != null ? claim.memberId.eq(targetMemberId) : null;
     }
 
     private BooleanExpression orderNumberEq(String orderNumber) {
@@ -83,28 +103,32 @@ public class ClaimRepositoryImpl implements ClaimRepositoryCustom {
         if (start != null && end != null) {
             return claim.createdAt.between(start, end);
         } else if (start != null) {
-            return claim.createdAt.goe(start); // 크거나 같다 (>=)
+            return claim.createdAt.goe(start);
         } else if (end != null) {
-            return claim.createdAt.loe(end);   // 작거나 같다 (<=)
+            return claim.createdAt.loe(end);
         }
         return null;
     }
 
-    // 클라이언트가 보낸 Sort 조건을 QueryDSL 객체로 변환.
-
+    // 정렬 조건
     private OrderSpecifier<?>[] getOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> specifiers = new ArrayList<>();
 
+        // MANUAL_CHECK_REQUIRED 상태를 최상단에 고정
+        NumberExpression<Integer> statusPriority = new CaseBuilder()
+                .when(claim.claimStatus.eq(Claim.ClaimStatus.MANUAL_CHECK_REQUIRED)).then(0)
+                .otherwise(1);
+        specifiers.add(statusPriority.asc());
+
+        // 클라이언트가 요청한 페이징 정렬 조건 적용
         if (!pageable.getSort().isEmpty()) {
             for (Sort.Order order : pageable.getSort()) {
                 Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
-
-                // PathBuilder를 활용해 클라이언트가 던진 문자열(예: "claimAmount")을 엔티티 필드로 동적 매핑
                 PathBuilder<Claim> pathBuilder = new PathBuilder<>(Claim.class, "claim");
                 specifiers.add(new OrderSpecifier(direction, pathBuilder.get(order.getProperty())));
             }
         } else {
-            // 정렬 조건이 없을 때의 기본값: 최신순(PK 내림차순)
+            // 정렬 조건이 없을 때의 기본값
             specifiers.add(claim.id.desc());
         }
 

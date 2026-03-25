@@ -1,4 +1,4 @@
-package com.team_e_commerce.core.claim.client.dto;
+package com.team_e_commerce.common.dto;
 
 public record OrderLineItemInternalDto(
         Long orderLineItemId,
@@ -7,5 +7,7 @@ public record OrderLineItemInternalDto(
         Long unitPrice,
         Long cancelableQuantity,
         String orderStatus,
-        String orderNumber
+        String orderNumber,
+        String paymentKey,
+        Long actualPayAmount
 ) {}

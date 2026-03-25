@@ -1,6 +1,6 @@
 package com.team_e_commerce.core.claim.repository;
 
-import com.team_e_commerce.core.claim.domain.Claim;
+import com.team_e_commerce.core.claim.entity.Claim;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

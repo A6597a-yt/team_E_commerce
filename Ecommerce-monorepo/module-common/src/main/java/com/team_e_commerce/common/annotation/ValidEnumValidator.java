@@ -13,9 +13,9 @@ public class ValidEnumValidator implements ConstraintValidator<ValidEnum, String
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        // null 처리는 @NotNull 등 다른 어노테이션에 맡기고, 여기서는 값 자체만 검증합니다.
+        // ★ null이나 공백일 때는 검증 성공(true)으로 간주 (필수값 검증과 분리)
         if (value == null || value.isBlank()) {
-            return false;
+            return true;
         }
 
         Object[] enumValues = this.annotation.enumClass().getEnumConstants();
@@ -26,6 +26,6 @@ public class ValidEnumValidator implements ConstraintValidator<ValidEnum, String
                 }
             }
         }
-        return false; // 일치하는 Enum이 없으면 검증 실패
+        return false;
     }
 }

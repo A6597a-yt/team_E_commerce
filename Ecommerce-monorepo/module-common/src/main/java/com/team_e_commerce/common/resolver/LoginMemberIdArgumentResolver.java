@@ -1,6 +1,8 @@
 package com.team_e_commerce.common.resolver;
 
 import com.team_e_commerce.common.annotation.LoginMemberId;
+import com.team_e_commerce.common.exception.BusinessException;
+import com.team_e_commerce.common.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -30,8 +32,8 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
         Object memberId = request.getAttribute("MEMBER_ID");
 
         if (memberId == null) {
-            // 비인증 사용자가 접근했을 때의 방어 로직
-            throw new IllegalArgumentException("인증된 사용자 정보가 없습니다.");
+            // ★ IllegalArgumentException에서 BusinessException으로 교체
+            throw new BusinessException(ErrorCode.UNAUTHORIZED_USER);
         }
 
         return Long.valueOf(memberId.toString());

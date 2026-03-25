@@ -1,4 +1,4 @@
-package com.team_e_commerce.core.claim.client.dto;
+package com.team_e_commerce.common.dto;
 
 public record AdminClaimHistoryRequestDto(
         Long adminId,           // 관리자 식별자

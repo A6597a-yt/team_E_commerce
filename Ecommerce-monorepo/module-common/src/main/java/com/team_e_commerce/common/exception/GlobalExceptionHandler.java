@@ -1,7 +1,7 @@
 package com.team_e_commerce.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException; // ★ 추가됨
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -31,7 +31,6 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException e, HttpServletRequest request) {
         log.warn("MethodArgumentNotValidException: {}", e.getMessage());
 
-        // record 구조에 맞게 생성 로직 수정
         List<ErrorResponse.FieldErrorDetail> errors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -42,6 +41,7 @@ public class GlobalExceptionHandler {
                 ))
                 .toList();
 
+        // 생성한 errors 리스트를 함께 전달
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, request.getRequestURI(), errors);
         return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus()).body(response);
     }
@@ -86,4 +86,5 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, request.getRequestURI());
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus()).body(response);
     }
+
 }

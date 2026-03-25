@@ -1,7 +1,7 @@
 package com.team_e_commerce.core.claim.dto;
 
-import com.team_e_commerce.core.claim.domain.Claim.ClaimStatus;
-import com.team_e_commerce.core.claim.domain.Claim.ClaimType;
+import com.team_e_commerce.core.claim.entity.Claim.ClaimStatus;
+import com.team_e_commerce.core.claim.entity.Claim.ClaimType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

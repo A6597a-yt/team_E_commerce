@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "올바르지 않은 입력값입니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "로그인이 필요한 서비스입니다."),
 
     // === [주문 (Order) 도메인 에러] ===
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 내역을 찾을 수 없습니다."),
@@ -23,11 +24,13 @@ public enum ErrorCode {
     EXCEED_CANCELABLE_QUANTITY(HttpStatus.BAD_REQUEST, "취소/환불 가능한 잔여 수량을 초과했습니다."),
     INVALID_CLAIM_STATUS(HttpStatus.BAD_REQUEST, "현재 상태에서는 클레임 처리가 불가능합니다."),
     REFUND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "환불 처리 중 오류가 발생했습니다."),
-    CLAIM_NOT_FOUND(HttpStatus.NOT_FOUND, "취소,환불요청을 찾을 수 없습니다.");
+    CLAIM_NOT_FOUND(HttpStatus.NOT_FOUND, "취소,환불요청을 찾을 수 없습니다."),
+    MANUAL_CHECK_REQUIRED(HttpStatus.INTERNAL_SERVER_ERROR, "결제는 취소되었으나 시스템 오류로 상태가 반영되지 않았습니다. 수동 확인이 필요합니다."),
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "요청이 진행 중입니다. 잠시 후 다시 시도해 주세요."),
 
     // === [재고 (Inventory) 도메인 에러] ===
-    // OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 재고가 부족합니다."),
-    // INVENTORY_RESTORE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "재고 복구 처리 중 오류가 발생했습니다."),
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 재고가 부족합니다."),
+    INVENTORY_RESTORE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "재고 복구 처리 중 오류가 발생했습니다.");
 
     // === [결제 (Payment) 도메인 에러] ===
     // PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했습니다."),
@@ -77,4 +80,5 @@ public enum ErrorCode {
     public String getCode() {
         return this.name();
     }
+
 }
