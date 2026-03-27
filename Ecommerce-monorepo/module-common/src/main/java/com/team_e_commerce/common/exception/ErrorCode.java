@@ -30,7 +30,7 @@ public enum ErrorCode {
 
     // === [재고 (Inventory) 도메인 에러] ===
     OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 재고가 부족합니다."),
-    INVENTORY_RESTORE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "재고 복구 처리 중 오류가 발생했습니다.");
+    INVENTORY_RESTORE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "재고 복구 처리 중 오류가 발생했습니다."),
 
     // === [결제 (Payment) 도메인 에러] ===
     // PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했습니다."),
@@ -45,7 +45,7 @@ public enum ErrorCode {
     // ALREADY_SHIPPED(HttpStatus.BAD_REQUEST, "이미 배송이 시작되어 변경이 불가능합니다."),
 
     // === [상품 (Product) 도메인 에러] ===
-    // PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 정보를 찾을 수 없습니다."),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 정보를 찾을 수 없습니다.")
     // CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리 정보를 찾을 수 없습니다."),
 
     // === [회원  (Member) 도메인 에러] ===
@@ -72,7 +72,7 @@ public enum ErrorCode {
     // === [관리자 (Backoffice) 도메인 에러] ===
     // NO_ADMIN_PERMISSION(HttpStatus.FORBIDDEN, "관리자 권한이 없습니다."),
     // LOG_WRITE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "활동 이력 기록에 실패했습니다.");
-
+    ;
     private final HttpStatus httpStatus;
     private final String description;
 

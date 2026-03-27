@@ -1,6 +1,5 @@
 package com.team_e_commerce.support.backoffice.controller;
 
-import com.team_e_commerce.common.annotation.LoginMemberId;
 import com.team_e_commerce.common.response.ApiResponse;
 import com.team_e_commerce.support.backoffice.dto.AdminLogRequest;
 import com.team_e_commerce.support.backoffice.service.AdminActivityLogService;
@@ -21,7 +20,7 @@ public class AdminActivityLogController {
      */
     @PostMapping
     public ApiResponse<Void> createLog(
-            @LoginMemberId Long adminId,
+            Long adminId,
             @Valid @RequestBody AdminLogRequest request) {
 
         adminActivityLogService.recordActivity(adminId, request);

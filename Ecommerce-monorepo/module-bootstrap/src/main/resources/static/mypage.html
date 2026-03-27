@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">E-Commerce</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>마이페이지</h2>
+    
+    <div class="card mt-3">
+        <div class="card-header">클레임(취소/반품) 접수</div>
+        <div class="card-body">
+            <input type="number" id="claimOrderId" class="form-control mb-2" placeholder="주문 ID">
+            <input type="number" id="claimOrderLineId" class="form-control mb-2" placeholder="부분 취소할 주문 상세 상품 ID (선택적)">
+            <select id="claimType" class="form-control mb-2">
+                <option value="CANCEL">결제 취소</option>
+                <option value="RETURN">반품</option>
+            </select>
+            <button class="btn btn-warning" onclick="requestClaim()">클레임 신청</button>
+        </div>
+    </div>
+
+    <h4 class="mt-4">내 클레임 내역</h4>
+    <ul class="list-group" id="claimList">
+        </ul>
+</div>
+
+<script>
+    const baseUrl = 'http://localhost:8080';
+    const token = localStorage.getItem('savedToken');
+
+    async function loadClaims() {
+        try {
+            // 클레임 내역 조회 API 호출 
+            const response = await fetch(`${baseUrl}/api/v1/claims`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await response.json();
+            const claimList = document.getElementById('claimList');
+            claimList.innerHTML = '';
+
+            json.data.content.forEach(claim => {
+                claimList.innerHTML += `<li class="list-group-item">
+                    클레임 ID: ${claim.claimId} | 타입: ${claim.claimType} | 상태: ${claim.claimStatus} | 대상상품: ${claim.productName}
+                </li>`;
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function requestClaim() {
+        const orderId = document.getElementById('claimOrderId').value;
+        const orderLineId = document.getElementById('claimOrderLineId').value;
+        const claimType = document.getElementById('claimType').value;
+
+        try {
+            // 클레임 생성 API 호출 
+            const response = await fetch(`${baseUrl}/api/v1/claims`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orderId: parseInt(orderId),
+                    claimType: claimType,
+                    reasonCode: "SIMPLE_CHANGE_OF_MIND",
+                    isOpened: false,
+                    targetOrderLineIds: orderLineId ? [parseInt(orderLineId)] : [100] // 테스트용 더미
+                })
+            });
+            if(response.ok) {
+                alert("클레임이 접수되었습니다.");
+                loadClaims();
+            } else {
+                alert("접수 실패");
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    loadClaims();
+</script>
+</body>
+</html>

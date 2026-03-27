@@ -1,6 +1,5 @@
 package com.team_e_commerce.support.cs.controller;
 
-import com.team_e_commerce.common.annotation.LoginMemberId;
 import com.team_e_commerce.common.response.ApiResponse;
 import com.team_e_commerce.support.cs.dto.TicketCreateRequest;
 import com.team_e_commerce.support.cs.dto.TicketResponse;
@@ -31,7 +30,7 @@ public class CsTicketController {
      */
     @PostMapping
     public ApiResponse<TicketResponse> createTicket(
-            @LoginMemberId Long memberId,
+            Long memberId,
             @Valid @RequestBody TicketCreateRequest request) {
 
         TicketResponse response = csTicketService.createTicket(memberId, request);
@@ -46,7 +45,7 @@ public class CsTicketController {
      */
     @DeleteMapping("/{ticketId}")
     public ApiResponse<Void> deleteTicket(
-            @LoginMemberId Long memberId,
+            Long memberId,
             @PathVariable Long ticketId) {
 
         csTicketService.deleteTicket(memberId, ticketId);

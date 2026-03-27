@@ -27,7 +27,7 @@ public class OutboxRetryService {
     @Transactional
     @Scheduled(fixedDelay = 300000)
     public void retryFailedEvents() {
-        List<EventOutbox> failedEvents = outboxRepository.findByPublishedFalseAndRetryCountLessThan(MAX_RETRIES);
+        List<EventOutbox> failedEvents = outboxRepository.findTop100ByPublishedFalseAndRetryCountLessThan(MAX_RETRIES);
 
         if (failedEvents.isEmpty()) {
             return;

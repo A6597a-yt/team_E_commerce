@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이커머스 통합 테스트 V3 (Auth/Cart/Order/Claim)</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; line-height: 1.6; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel { background: white; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 15px; }
+        .panel h3 { margin-top: 0; color: #0d6efd; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 3px; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { height: 80px; font-family: monospace; font-size: 12px; }
+        button { background: #212529; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
+        button:hover { opacity: 0.8; }
+        button.send { background: #0d6efd; width: 100%; font-weight: bold; }
+        #response-panel { position: sticky; top: 20px; background: #212529; color: #00ff00; height: calc(100vh - 40px); overflow-y: auto; }
+        pre { white-space: pre-wrap; word-break: break-all; margin: 0; font-size: 12px; }
+        .status { font-weight: bold; padding: 5px; margin-top: 10px; border-radius: 4px; }
+        .success { background: #d1e7dd; color: #0f5132; }
+        .error { background: #f8d7da; color: #842029; }
+    </style>
+</head>
+<body>
+    <h2>이커머스 통합 API 테스터 V3</h2>
+    <h3>임시토큰 발행 : http://localhost:8080/api/v1/test/token/1</h3>
+    
+    <div class="grid">
+        <div>
+            <div class="panel">
+                <h3>1. 전역 설정 (Auth)</h3>
+                <div class="form-group">
+                    <label>Base URL</label>
+                    <input type="text" id="baseUrl" value="http://localhost:8080">
+                </div>
+                <div class="form-group">
+                    <label>Access Token (Bearer)</label>
+                    <input type="text" id="accessToken" placeholder="로그인 후 발급받은 토큰을 입력하세요">
+                </div>
+                <button onclick="localStorage.setItem('savedToken', document.getElementById('accessToken').value)">토큰 로컬 저장</button>
+                <button onclick="document.getElementById('accessToken').value = localStorage.getItem('savedToken')">불러오기</button>
+            </div>
+
+            <div class="panel">
+                <h3>2. 상품 및 장바구니 (Redis)</h3>
+                <button onclick="callApi('/api/v1/products/list', 'GET')">전체 상품 조회</button>
+                <div class="form-group" style="margin-top:10px;">
+                    <label>장바구니 담기 (Body)</label>
+                    <textarea id="cartBody">{"productOptionId": 1, "quantity": 2}</textarea>
+                    <button class="send" onclick="callApi('/api/v1/carts', 'POST', 'cartBody')">장바구니 추가</button>
+                </div>
+                <button onclick="callApi('/api/v1/carts', 'GET')">장바구니 목록 조회</button>
+            </div>
+
+            <div class="panel">
+                <h3>3. 주문 및 결제 (Event 기반)</h3>
+                <div class="form-group">
+                    <label>주문 생성 (Body)</label>
+                    <textarea id="orderBody">{
+    "orderItems": [
+        {"productOptionId": 1, "quantity": 1}
+    ]
+}</textarea>
+                    <button class="send" onclick="callApi('/api/v1/orders', 'POST', 'orderBody')">주문서 생성</button>
+                </div>
+                <div class="form-group">
+                    <label>주문 ID (결제/상세용)</label>
+                    <input type="text" id="targetOrderId" placeholder="주문 생성 후 ID 입력">
+                </div>
+                <button class="send" onclick="callApi('/api/v1/payments/' + document.getElementById('targetOrderId').value + '/process', 'POST', null, {'amount': 15000})">임시 결제 승인 요청</button>
+            </div>
+
+            <div class="panel">
+                <h3>4. 클레임 및 어드민</h3>
+                <button onclick="callApi('/api/v1/claims', 'GET')">내 클레임 내역 조회</button>
+                <div class="form-group" style="margin-top:10px;">
+                    <label>클레임 ID</label>
+                    <input type="text" id="targetClaimId">
+                </div>
+                <button onclick="callApi('/api/v1/admin/claims/' + document.getElementById('targetClaimId').value + '/start-processing', 'PATCH')">어드민: 처리 시작</button>
+                <button onclick="callApi('/api/v1/admin/claims/' + document.getElementById('targetClaimId').value + '/approve', 'PATCH')" style="background:#198754;">어드민: 환불 승인</button>
+                <div class="form-group" style="margin-top:5px;">
+                    <label>거절 사유</label>
+                    <input type="text" id="rejectReason" value="단순 변심 불가">
+                    <button onclick="callApi('/api/v1/admin/claims/' + document.getElementById('targetClaimId').value + '/reject', 'PATCH', null, {'rejectReason': document.getElementById('rejectReason').value})" style="background:#dc3545;">어드민: 거절</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="response-panel">
+            <div id="status-code" class="status" style="display:none;"></div>
+            <h4>Response Body:</h4>
+            <pre id="response-body">API 호출 결과가 여기에 표시됩니다.</pre>
+        </div>
+    </div>
+
+    <script>
+        async function callApi(endpoint, method, bodyId = null, directBody = null) {
+            const baseUrl = document.getElementById('baseUrl').value;
+            const token = document.getElementById('accessToken').value;
+            const resBody = document.getElementById('response-body');
+            const resStatus = document.getElementById('status-code');
+
+            resBody.textContent = '통신 중...';
+            resStatus.style.display = 'none';
+
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            };
+
+            if (bodyId) {
+                options.body = document.getElementById(bodyId).value;
+            } else if (directBody) {
+                options.body = JSON.stringify(directBody);
+            }
+
+            try {
+                const response = await fetch(baseUrl + endpoint, options);
+                const data = await response.json();
+
+                resStatus.style.display = 'block';
+                resStatus.textContent = `Status: ${response.status}`;
+                resStatus.className = `status ${response.ok ? 'success' : 'error'}`;
+                
+                resBody.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resStatus.style.display = 'block';
+                resStatus.textContent = 'Error: ' + error.message;
+                resStatus.className = 'status error';
+                resBody.textContent = '서버가 꺼져있거나 네트워크 오류가 발생했습니다.';
+            }
+        }
+    </script>
+</body>
+</html>

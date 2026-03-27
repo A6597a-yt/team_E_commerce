@@ -77,6 +77,10 @@ public class Order extends BaseEntity {
         lineItem.setOrder(this);
     }
 
+    public void updateStatus(OrderStatus status) {
+        this.orderStatus = status.name();
+    }
+
     public void hideOrder() {
         this.isVisible = false;
     }

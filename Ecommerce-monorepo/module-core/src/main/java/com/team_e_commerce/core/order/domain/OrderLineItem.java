@@ -1,3 +1,4 @@
+// 파일 경로: module-core/src/main/java/com/team_e_commerce/core/order/domain/OrderLineItem.java
 package com.team_e_commerce.core.order.domain;
 
 import com.team_e_commerce.common.entity.BaseEntity;
@@ -15,22 +16,21 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderLineItem extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // N:1 매핑
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    // 상품 ID 대신 옵션 ID(SKU)를 식별자로 사용
     @Column(nullable = false)
-    private Long productId;
+    private Long productOptionId;
 
-    // 상품명
     @Column(nullable = false)
     private String productName;
 
-    // 수량 및 금액
     @Column(nullable = false)
     private Integer unitPrice;
 
@@ -40,14 +40,14 @@ public class OrderLineItem extends BaseEntity {
     @Column(nullable = false)
     private Integer lineTotalAmount;
 
-    // 다중 옵션 JSON 컨버터 적용 및 TEXT 타입 지정
+    // 결제 당시 옵션 상태 스냅샷 저장용 JSON
     @Convert(converter = OrderOptionConverter.class)
     @Column(columnDefinition = "TEXT")
     private Map<String, String> options = new HashMap<>();
 
     @Builder
-    public OrderLineItem(Long productId, String productName, Integer unitPrice, Integer quantity, Map<String, String> options) {
-        this.productId = productId;
+    public OrderLineItem(Long productOptionId, String productName, Integer unitPrice, Integer quantity, Map<String, String> options) {
+        this.productOptionId = productOptionId;
         this.productName = productName;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
