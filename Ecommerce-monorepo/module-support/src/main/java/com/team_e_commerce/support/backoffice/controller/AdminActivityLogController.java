@@ -5,6 +5,7 @@ import com.team_e_commerce.support.backoffice.dto.AdminLogRequest;
 import com.team_e_commerce.support.backoffice.service.AdminActivityLogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +21,7 @@ public class AdminActivityLogController {
      */
     @PostMapping
     public ApiResponse<Void> createLog(
-            Long adminId,
+            @AuthenticationPrincipal Long adminId,
             @Valid @RequestBody AdminLogRequest request) {
 
         adminActivityLogService.recordActivity(adminId, request);
