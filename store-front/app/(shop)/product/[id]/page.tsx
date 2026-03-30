@@ -1,14 +1,18 @@
-"use client"
-import React, { useState, use } from 'react';
-import Link from 'next/link';
-import { Icon } from '@iconify/react/dist/iconify.js';
+'use client';
 
-// --- 타입 정의 (Next.js 16 비동기 params 대응) ---
+import { Icon } from '@iconify/react/dist/iconify.js';
+import Link from 'next/link';
+import React, { useState, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { addToCartAction } from '@/features/cart/actions'; // 본인 경로에 맞게 수정
+
 interface ProductPageProps {
     params: Promise<{ id: string }>;
 }
 
 export default function ProductDetailPage({ params }: ProductPageProps) {
+    const router = useRouter();
+
     // 1. 비동기 Params 언래핑
     const { id } = use(params);
 
@@ -32,12 +36,29 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
             'https://placehold.co/800x800/333/fff?text=Detail+View+1',
             'https://placehold.co/800x800/444/fff?text=Detail+View+2',
         ],
-        tags: ["Liscensed", "Gas Blowback", "Real Weight"]
+        tags: ["Liscensed", "Gas Blowback", "Real Weight"],
+        status: "ON_SALE" // 임시 상태값
     };
 
     const handleQuantity = (type: 'plus' | 'minus') => {
         if (type === 'plus') setQuantity(prev => prev + 1);
         else if (type === 'minus' && quantity > 1) setQuantity(prev => prev - 1);
+    };
+
+    // 장바구니 담기 로직
+    const handleAddToCart = async () => {
+        const res = await addToCartAction({
+            productId: Number(product.id),
+            quantity: quantity
+        });
+
+        if (res.success) {
+            if(confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
+                router.push('/cart');
+            }
+        } else {
+            alert(res.error);
+        }
     };
 
     return (
@@ -131,10 +152,21 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
 
                             {/* 버튼 그룹 (데스크톱 전용) */}
                             <div className="hidden lg:flex gap-4">
-                                <button className="flex-1 h-16 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black hover:bg-slate-200 transition-colors">
+                                {/* 1. 장바구니 버튼: handleAddToCart 함수 연결 */}
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.status === 'SOLD_OUT'}
+                                    className="flex-1 h-16 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black hover:bg-slate-200 transition-colors"
+                                >
                                     장바구니
                                 </button>
-                                <button className="flex-[2] h-16 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all">
+
+                                {/* 2. 결제하기 버튼: 결제 페이지로 이동하도록 router.push 연결 */}
+                                <button
+                                    onClick={() => router.push('/checkout')}
+                                    disabled={product.status === 'SOLD_OUT'}
+                                    className="flex-[2] h-16 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all"
+                                >
                                     결제하기
                                 </button>
                             </div>

@@ -43,7 +43,10 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/api/v1/products/list",
                                 "/api/v1/test/token/**",
-                                "/api/v1/members/login" // 실제 로그인 API 경로 추가
+                                "/api/v1/members/login", // 실제 로그인 API 경로 추가
+                                "/api/v1/members/signup",
+                                "/api/v1/orders",
+                                "/api/v1/admin/notifications"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

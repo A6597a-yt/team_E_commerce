@@ -31,3 +31,9 @@ jwt:
   # HS256 알고리즘을 위해 반드시 32자(256비트) 이상의 문자열이어야 합니다.
   secret: "this-is-a-very-secure-secret-key-for-jwt-must-be-long-enough-for-hs256"
   access-token-validity-in-seconds: 3600
+
+# application.yml
+logging:
+  pattern:
+    # 기존 스프링 기본 패턴에 [%X{traceId}] 를 추가한 형태
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%X{traceId}] --- [%15.15t] %-40.40logger{39} : %m%n"

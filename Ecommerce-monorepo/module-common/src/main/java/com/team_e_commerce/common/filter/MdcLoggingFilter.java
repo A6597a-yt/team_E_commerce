@@ -29,6 +29,9 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
         String traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         MDC.put(TRACE_ID, traceId);
 
+        // 👉 추가할 코드: 필터가 작동할 때마다 콘솔에 대문짝만하게 찍히도록 설정
+        log.info("====== 필터 통과! 부여된 Trace ID: {} ======", traceId);
+
         try {
             // 다음 필터나 컨트롤러로 요청을 넘깁니다.
             filterChain.doFilter(request, response);

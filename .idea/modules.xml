@@ -3,10 +3,15 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-bootstrap/ecommerce-monorepo.module-bootstrap.main.iml" filepath="$PROJECT_DIR$/.idea/modules/module-bootstrap/ecommerce-monorepo.module-bootstrap.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-bootstrap/ecommerce-monorepo.module-bootstrap.test.iml" filepath="$PROJECT_DIR$/.idea/modules/module-bootstrap/ecommerce-monorepo.module-bootstrap.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-catalog-member/ecommerce-monorepo.module-catalog-member.main.iml" filepath="$PROJECT_DIR$/.idea/modules/module-catalog-member/ecommerce-monorepo.module-catalog-member.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-catalog-member/ecommerce-monorepo.module-catalog-member.test.iml" filepath="$PROJECT_DIR$/.idea/modules/module-catalog-member/ecommerce-monorepo.module-catalog-member.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-common/ecommerce-monorepo.module-common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/module-common/ecommerce-monorepo.module-common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-common/ecommerce-monorepo.module-common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/module-common/ecommerce-monorepo.module-common.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-core/ecommerce-monorepo.module-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/module-core/ecommerce-monorepo.module-core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-core/ecommerce-monorepo.module-core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/module-core/ecommerce-monorepo.module-core.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-support/ecommerce-monorepo.module-support.main.iml" filepath="$PROJECT_DIR$/.idea/modules/module-support/ecommerce-monorepo.module-support.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/module-support/ecommerce-monorepo.module-support.test.iml" filepath="$PROJECT_DIR$/.idea/modules/module-support/ecommerce-monorepo.module-support.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/team_E_commerce.iml" filepath="$PROJECT_DIR$/.idea/team_E_commerce.iml" />
     </modules>
   </component>
