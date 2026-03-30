@@ -26,3 +26,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+jwt:
+  # HS256 알고리즘을 위해 반드시 32자(256비트) 이상의 문자열이어야 합니다.
+  secret: "this-is-a-very-secure-secret-key-for-jwt-must-be-long-enough-for-hs256"
+  access-token-validity-in-seconds: 3600
