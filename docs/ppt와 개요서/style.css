@@ -1,0 +1,133 @@
+:root {
+    --bg: #0d1117; 
+    --side: #161b22; 
+    --txt: #c9d1d9; 
+    --head: #ffffff;
+    --card: #21262d; 
+    --accent: #58a6ff; 
+    --border: #30363d;
+    --prob: #f85149; 
+    --sol: #3fb950;
+}
+
+body.light-mode {
+    --bg: #ffffff; 
+    --side: #f6f8fa; 
+    --txt: #24292f; 
+    --head: #1a7f37;
+    --card: #ffffff; 
+    --accent: #0969da; 
+    --border: #d0d7de;
+    --prob: #cf222e; 
+    --sol: #1a7f37;
+}
+
+body { 
+    font-family: 'Pretendard', sans-serif; 
+    margin: 0; 
+    display: flex; 
+    height: 100vh; 
+    background: var(--bg); 
+    color: var(--txt); 
+    transition: 0.3s; 
+}
+
+#theme-toggle {
+    position: fixed; 
+    top: 20px; 
+    right: 20px; 
+    z-index: 1000;
+    padding: 8px 16px; 
+    cursor: pointer; 
+    background: var(--card);
+    color: var(--txt); 
+    border: 1px solid var(--border); 
+    border-radius: 20px;
+}
+
+nav { 
+    width: 320px; 
+    background: var(--side); 
+    border-right: 1px solid var(--border); 
+    display: flex; 
+    flex-direction: column; 
+    overflow-y: auto; 
+}
+
+.nav-header { 
+    padding: 30px 20px; 
+    border-bottom: 1px solid var(--border); 
+    position: sticky; 
+    top: 0; 
+    background: var(--side); 
+    z-index: 10; 
+}
+
+.nav-item { 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    font-size: 0.8rem; 
+    border-left: 4px solid transparent; 
+}
+
+.nav-item.active { 
+    background: rgba(88, 166, 255, 0.1); 
+    border-left-color: var(--accent); 
+    color: var(--head); 
+    font-weight: bold; 
+}
+
+main { 
+    flex: 1; 
+    padding: 40px 60px; 
+    overflow-y: auto; 
+}
+
+.section { 
+    display: none; 
+    animation: fadeIn 0.3s; 
+}
+
+.section.active { 
+    display: block; 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+h1 { 
+    font-size: 1.8rem; 
+    margin-bottom: 30px; 
+    color: var(--head); 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 10px; 
+}
+
+.grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px; 
+    margin-bottom: 25px; 
+}
+
+.card { 
+    background: var(--card); 
+    padding: 20px; 
+    border-radius: 10px; 
+    border: 1px solid var(--border); 
+}
+
+.card h3 { 
+    margin: 0 0 10px; 
+    font-size: 1rem; 
+}
+
+.prob h3 { color: var(--prob); } 
+.sol h3 { color: var(--sol); }
+
+pre { 
+    border-radius: 8px !important; 
+    font-size: 0.8rem !important; 
+}
