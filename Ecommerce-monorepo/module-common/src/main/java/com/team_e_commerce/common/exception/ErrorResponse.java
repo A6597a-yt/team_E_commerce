@@ -1,5 +1,6 @@
 package com.team_e_commerce.common.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,46 +13,46 @@ import java.util.List;
 @Builder
 public class ErrorResponse {
 
-    private final LocalDateTime timestamp; // 에러 발생 시간
-    private final int status;              // HTTP 상태 코드
-    private final String code;             // 에러 식별자 (Enum name)
-    private final String description;      // 프론트 알림창용 문구
-    private final String path;             // 에러가 발생한 API 주소
+    // @JsonFormat을 통해 응답 JSON 변환 시 자동으로 yyyy-MM-dd'T'HH:mm:ss 형식의 문자열로 변환됨
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    private final LocalDateTime timestamp;
+
+    private final int status;
+    private final String code;
+    private final String message;
+    private final String path;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final List<FieldErrorDetail> errors;
 
-    // 1. 기본 비즈니스 예외 응답 (ErrorCode의 기본 description 사용)
     public static ErrorResponse of(ErrorCode errorCode, String path) {
         return ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now()) // String 변환 없이 LocalDateTime 그대로 삽입
                 .status(errorCode.getHttpStatus().value())
-                .code(errorCode.name())
-                .description(errorCode.getDescription())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
                 .path(path)
                 .errors(new ArrayList<>())
                 .build();
     }
 
-    // 2. 외부에서 메시지를 직접 주입하는 경우 (예: GlobalExceptionHandler의 예외 메시지 커스텀)
-    public static ErrorResponse of(ErrorCode errorCode, String description, String path) {
+    public static ErrorResponse of(ErrorCode errorCode, String customMessage, String path) {
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(errorCode.getHttpStatus().value())
-                .code(errorCode.name())
-                .description(description)
+                .code(errorCode.getCode())
+                .message(customMessage)
                 .path(path)
                 .errors(new ArrayList<>())
                 .build();
     }
 
-    // 3. 유효성 검증(Validation) 에러용 응답
     public static ErrorResponse of(ErrorCode errorCode, String path, List<FieldErrorDetail> errors) {
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(errorCode.getHttpStatus().value())
-                .code(errorCode.name())
-                .description(errorCode.getDescription())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
                 .path(path)
                 .errors(errors)
                 .build();
@@ -59,9 +60,8 @@ public class ErrorResponse {
 
     @Builder
     public record FieldErrorDetail(
-            String field,   // 예: "email"
-            String value,   // 예: "wrong-format"
-            String reason   // 예: "이메일 형식이 올바르지 않습니다."
+            String field,
+            String value,
+            String reason
     ) {}
-
 }
